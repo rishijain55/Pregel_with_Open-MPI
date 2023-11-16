@@ -1,6 +1,9 @@
+#ifndef MASTER
+#define MASTER
 #include<bits/stdc++.h>
-#include "vertex.hpp"
+#include "aggregator.hpp"
 #include "node.hpp"
+#include "vertex.hpp"
 #include<mpi.h>
 using namespace std;
 
@@ -8,10 +11,13 @@ class Master : public Node {
     public:
     int numWorkers;
     int workerId;
+    int step_num;
+    Aggregator agg;
 
     Master( int workerId, int numWorkers) {
         this->numWorkers = numWorkers;
         this->workerId = workerId;
+        this->step_num = 0;
     }
 
     void run() {
@@ -22,7 +28,7 @@ class Master : public Node {
     }
 
     void superstep() {
-        //implement
+        step_num++;
         return;
     }
 
@@ -60,5 +66,5 @@ class Master : public Node {
         return vid % (numWorkers-1) +1;
     }
 
-
 };
+#endif

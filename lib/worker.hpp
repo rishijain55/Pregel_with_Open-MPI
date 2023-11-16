@@ -1,6 +1,9 @@
+#ifndef WORKER
+#define WORKER
 #include<bits/stdc++.h>
-#include "vertex.hpp"
+#include "aggregator.hpp"
 #include "node.hpp"
+#include "vertex.hpp"
 #include<mpi.h>
 using namespace std;
 
@@ -10,26 +13,28 @@ class Worker : public Node {
     vector<Vertex*> vertices;
     int numWorkers;
     int workerId;
+    int step_num;
+    Aggregator agg;
 
     Worker( int workerId, int numWorkers, vector<Vertex*> vertices) {
         this->vertices = vertices;
         this->numWorkers = numWorkers;
         this->workerId = workerId;
+        this->step_num = 0;
     }
 
     void run() {
         do{
             superstep();
             sendMessages();
-            // cout<<"Worker "<<workerId<<endl;
         }while((numActive() > 0));
-        cout<<"Worker "<<workerId<<" done and value is "<<vertices[0]->value<<endl;
     }
 
     void superstep() {
         for (auto vertex : vertices) {
             vertex->update();
         }
+        step_num++;
     }
 
     bool isActive() {
@@ -131,3 +136,4 @@ class Worker : public Node {
         return vid/(numWorkers-1);
     }
 };
+#endif

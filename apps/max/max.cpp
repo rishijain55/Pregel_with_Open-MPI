@@ -1,7 +1,5 @@
 //create a base class node and then inherit master and worker from it. proc 0 is master and rest are workers
-#include "master.hpp"
-#include "worker.hpp"
-#include<mpi.h>
+#include "pregel.hpp"
 #include<bits/stdc++.h>
 using namespace std;
 
@@ -22,7 +20,6 @@ void Vertex::update() {
     //set active to false if no change
     double old = value;
     for (auto message : incomingMessages) {
-        // cout<<"Vertex "<<id<<" received "<<message<<endl;
         value = max(value, message);
     }
     if (old >= value && superstep > 0) {
