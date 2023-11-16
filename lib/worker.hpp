@@ -1,9 +1,10 @@
 #include<bits/stdc++.h>
 #include "vertex.hpp"
+#include "node.hpp"
 #include<mpi.h>
 using namespace std;
 
-class Worker {
+class Worker : public Node {
     public:
     vector<Vertex*> vertices;
     int numWorkers;
@@ -16,16 +17,17 @@ class Worker {
     }
 
     void run() {
-        superstep();
-        sendMessages();
-        // Cleanup logic, if any
+        do{
+            superstep();
+            sendMessages();
+            cout<<"Worker "<<workerId<<endl;
+        }while((numActive() > 0));
+        cout<<"Worker "<<workerId<<" done and value is "<<vertices[0]->value<<endl;
     }
 
     void superstep() {
         for (auto vertex : vertices) {
-            if(vertex->active) {
-                vertex->update();
-            }
+            vertex->update();
         }
     }
 
@@ -38,12 +40,7 @@ class Worker {
         return false;
     }
 
-    int numActive() {
-        int totalActive = 0;
-        int active = isActive();
-        MPI_Allreduce(&active, &totalActive, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-        return totalActive;
-    }
+
 
     void sendMessages() {
         // note that 0 is the master. use alltoall for transfering messages
@@ -96,7 +93,8 @@ class Worker {
         //create a type for pair<int,double>
         MPI_Datatype MPI_PAIR;
         MPI_Datatype types [2] = {MPI_INT, MPI_DOUBLE};
-        int bl[2] = {1,1}, offsets[2] = {0, sizeof(int)};
+        int bl[2] = {1,1};
+        MPI_Aint offsets[2] = {0, sizeof(int)};
         MPI_Type_create_struct(2, bl, offsets, types, &MPI_PAIR);
         MPI_Type_commit(&MPI_PAIR);
 
@@ -107,6 +105,7 @@ class Worker {
             int vid = messagesToReceive[i].first;
             double value = messagesToReceive[i].second;
             vertices[vid]->incomingMessages.push_back(value);
+            cout<<"Worker "<<workerId<<" received "<<value<<" for "<<vid<<endl;
         }
     }
 
