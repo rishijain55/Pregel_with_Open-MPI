@@ -3,7 +3,6 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-
 vector<Vertex*> get_graph(int workerId, int numWorkers) {
     vector<Vertex*> vertices;
     int cv = workerId-1;
@@ -13,11 +12,19 @@ vector<Vertex*> get_graph(int workerId, int numWorkers) {
     return vertices;
 }
 
+void Worker::output_results() {
+    for (auto vertex : vertices) {
+        cout << vertex->id << " " << vertex->value << endl;
+    }
+}
+
+void Master::output_results() {
+    return;
+}
+
+
 void Vertex::update() {
-    //logic for updating the vertex
-    //check incoming messages
-    //update value
-    //set active to false if no change
+
     double old = value;
     for (auto message : incomingMessages) {
         value = max(value, message);
@@ -29,14 +36,10 @@ void Vertex::update() {
         active = true;
     }
     if(active){
-        //send messages to outVertices
         for (auto outVertex : outVertices_id) {
             outgoingMessages.push_back({outVertex, value});
-            // cout<<"sending message from "<<id<<" to "<<outVertex<<endl;
         }
-
     }
-
     return;
 }
 

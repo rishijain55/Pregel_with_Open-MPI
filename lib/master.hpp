@@ -17,7 +17,6 @@ class Master : public Node {
     Master( int workerId, int numWorkers) {
         this->numWorkers = numWorkers;
         this->workerId = workerId;
-        this->step_num = 0;
     }
 
     void run() {
@@ -36,10 +35,8 @@ class Master : public Node {
         return false;
     }
 
-
     void sendMessages() {
         // note that 0 is the master. so here no message is sent
-
         vector<int> sendcounts(numWorkers, 0);
         vector<int> displs(numWorkers, 0);
         vector<int> recvcounts(numWorkers, 0);
@@ -55,10 +52,8 @@ class Master : public Node {
         MPI_Datatype types [2] = {MPI_INT, MPI_DOUBLE};
         int bl[2] = {1,1};
         MPI_Aint offsets[2] = {offsetof(pairID, first), offsetof(pairID, second)};
-
         MPI_Type_create_struct(2, bl, offsets, types, &MPI_PAIR);
         MPI_Type_commit(&MPI_PAIR);
-
         MPI_Alltoallv(messagesToSend, sendcounts.data(), displs.data(), MPI_PAIR, messagesToReceive, recvcounts.data(), recvdispls.data(), MPI_PAIR, MPI_COMM_WORLD);
     }
 
