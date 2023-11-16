@@ -25,6 +25,12 @@ void Vertex::update() {
         // cout<<"Vertex "<<id<<" received "<<message<<endl;
         value = max(value, message);
     }
+    if (old >= value && superstep > 0) {
+        active = false;
+    }
+    else{
+        active = true;
+    }
     if(active){
         //send messages to outVertices
         for (auto outVertex : outVertices_id) {
@@ -32,9 +38,6 @@ void Vertex::update() {
             // cout<<"sending message from "<<id<<" to "<<outVertex<<endl;
         }
 
-    }
-    if (old >= value && superstep > 0) {
-        active = false;
     }
 
     return;
