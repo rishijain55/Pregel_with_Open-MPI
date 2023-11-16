@@ -1,14 +1,15 @@
 #ifndef VERTEX_HPP
 #define VERTEX_HPP
 #include<bits/stdc++.h>
+using namespace std;
+
 
 struct pairID {
     int first;
     double second;
 };
 
-using namespace std;
-// Vertex.h
+
 class Vertex {
 public:
     int id;

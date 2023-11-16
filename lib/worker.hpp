@@ -8,22 +8,11 @@ using namespace std;
 class Worker : public Node {
     public:
     vector<Vertex*> vertices;
-    int numWorkers;
-    int workerId;
 
     Worker( int workerId, int numWorkers, vector<Vertex*> vertices) {
         this->vertices = vertices;
         this->numWorkers = numWorkers;
         this->workerId = workerId;
-    }
-
-    void run() {
-        do{
-            superstep();
-            sendMessages();
-            // cout<<"Worker "<<workerId<<endl;
-        }while((numActive() > 0));
-        cout<<"Worker "<<workerId<<" done and value is "<<vertices[0]->value<<endl;
     }
 
     void superstep() {
@@ -41,11 +30,8 @@ class Worker : public Node {
         return false;
     }
 
-
-
     void sendMessages() {
         // note that 0 is the master. use alltoall for transfering messages
-
         vector<int> sendcounts(numWorkers, 0);
         vector<int> displs(numWorkers, 0);
         vector<int> recvcounts(numWorkers, 0);
@@ -123,11 +109,6 @@ class Worker : public Node {
         }
     }
 
-    int workerFromId(int vid) {
-        return ((vid%(numWorkers-1)) +1);
-    }
+    void output_results();
 
-    int getIndex(int vid) {
-        return vid/(numWorkers-1);
-    }
 };
