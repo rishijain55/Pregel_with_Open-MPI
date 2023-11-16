@@ -22,14 +22,14 @@ void Vertex::update() {
     //set active to false if no change
     double old = value;
     for (auto message : incomingMessages) {
-        cout<<"Vertex "<<id<<" received "<<message<<endl;
+        // cout<<"Vertex "<<id<<" received "<<message<<endl;
         value = max(value, message);
     }
     if(active){
         //send messages to outVertices
         for (auto outVertex : outVertices_id) {
             outgoingMessages.push_back({outVertex, value});
-            cout<<"sending message from "<<id<<" to "<<outVertex<<endl;
+            // cout<<"sending message from "<<id<<" to "<<outVertex<<endl;
         }
 
     }
