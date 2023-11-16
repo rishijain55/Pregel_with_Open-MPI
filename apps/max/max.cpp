@@ -10,14 +10,31 @@ class Vertex : public baseVertex<int> {
     void update();
 };
 
-vector<Vertex*> get_graph(int workerId, int numWorkers) {
+vector<Vertex*> get_graph(int workerId,int numWorkers){
     vector<Vertex*> vertices;
-    int cv = workerId-1;
-    int nv = (cv+1)%(numWorkers-1);
-    double value = workerId*1.0;
-    vertices.push_back(new Vertex(cv, value, {nv}));
+    int N = 20;
+    int start = (N/(numWorkers-1))*(workerId-1);
+    int end = start + N/(numWorkers-1);
+    if(workerId==numWorkers-1) end = N;
+    for(int i=start;i<end;i++){
+        set<int> adj;
+        while(adj.size()!=10){
+            int t = rand()%N;
+            if(t==i) continue;
+            adj.insert(t);
+        }
+        vector<int> targets(adj.begin(),adj.end());
+        cout<<"Worker "<<workerId<<" vertex "<<i<<" has "<<targets.size()<<" out edges"<<endl;
+        for(auto t:targets){
+            cout<<t<<" ";
+        }
+        cout<<endl;
+        int value = 0;
+        vertices.push_back(new Vertex(i,value,targets));
+    }
     return vertices;
 }
+
 
 template<>
 void Worker<Vertex>::output_results() {

@@ -2,9 +2,15 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-vector<Vertex*> load_graph(int workerId,int numWorkers){
+class Vertex : public baseVertex<int> {
+    public:
+    using baseVertex<int>::baseVertex;
+    void update();
+};
+
+vector<Vertex*> get_graph(int workerId,int numWorkers){
     vector<Vertex*> vertices;
-    int N = 1000;
+    int N = 20;
     int start = (N/(numWorkers-1))*(workerId-1);
     int end = start + N/(numWorkers-1);
     if(workerId==numWorkers-1) end = N;
@@ -16,41 +22,55 @@ vector<Vertex*> load_graph(int workerId,int numWorkers){
             adj.insert(t);
         }
         vector<int> targets(adj.begin(),adj.end());
-        double value = 0.0;
+        cout<<"Worker "<<workerId<<" vertex "<<i<<" has "<<targets.size()<<" out edges"<<endl;
+        for(auto t:targets){
+            cout<<t<<" ";
+        }
+        cout<<endl;
+        int value = 0;
         vertices.push_back(new Vertex(i,value,targets));
     }
     return vertices;
 }
 
+
 void Vertex::update(){
-    if(id==0 && superstep==0) incomingMessages.push_back(0.0);
-    if(incomingMessages.size()==0) active = false;
+    if(id==0 && superstep==0) incomingMessages.push_back(0);
+    if(value ==1 || incomingMessages.size()==0) active = false;
     else{
         active = true;
-        if(value!=1.0){
-            value = 1.0;
-            for(auto message:incomingMessages){
-                for(auto t:outVertices_id){
-                    outgoingMessages.push_back({t,0.0});
-                }
-        }
+        value = 1;
+        for(auto t:outVertices_id){
+            outgoingMessages.push_back({t,0});
         }
     }
 }
 
-int main(int argc,char** argv){
-    srand(time(0));
+template<>
+void Worker<Vertex>::output_results() {
+    for(auto vertex:vertices){
+        cout<<vertex->id<<" "<<vertex->value<<endl;
+    }
+}
+
+template<>
+void Master<Vertex>::output_results() {
+    return;
+}
+
+
+int main(int argc, char** argv) {
     int numWorkers, workerId;
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numWorkers);
     MPI_Comm_rank(MPI_COMM_WORLD, &workerId);
-    Node* node;
+    Node<Vertex>* node;
     if (workerId == 0) {
 
-        node = new Master(workerId, numWorkers);
+        node = new Master<Vertex>(workerId, numWorkers);
     } else {
-        vector<Vertex*> vertices = load_graph(workerId, numWorkers);
-        node = new Worker(workerId, numWorkers, vertices);
+        vector<Vertex*> vertices = get_graph(workerId, numWorkers);
+        node = new Worker<Vertex>(workerId, numWorkers, vertices);
     }
     node->run();
     MPI_Finalize();
