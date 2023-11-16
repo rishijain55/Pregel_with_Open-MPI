@@ -11,39 +11,15 @@ template<typename Vertex>
 class Worker : public Node<Vertex> {
     public:
     typedef pairsec<typename Vertex::valType> pairID;
-    int numWorkers;
-    int workerId;
-    int step_num;
+
     Aggregator agg;
 
     Worker( int workerId, int numWorkers, vector<Vertex*> vertices) {
         this->vertices = vertices;
         this->numWorkers = numWorkers;
         this->workerId = workerId;
-        this->step_num = 0;
     }
 
-    void run() {
-        do{
-            superstep();
-            sendMessages();
-        }while((numActive() > 0));
-    }
-
-    void superstep() {
-        for (auto vertex : vertices) {
-            vertex->update();
-        }
-    }
-
-    bool isActive() {
-        for (auto vertex : vertices) {
-            if (vertex->active) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     void sendMessages() {
         // note that 0 is the master. use alltoall for transfering messages

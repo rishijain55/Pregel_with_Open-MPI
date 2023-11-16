@@ -19,14 +19,6 @@ class Master : public Node<Vertex> {
         this->workerId = workerId;
     }
 
-    void run() {
-        do{
-            superstep();
-            sendMessages();
-        }while((numActive() > 0));
-    }
-
-
 
     void sendMessages() {
         // note that 0 is the master. so here no message is sent
