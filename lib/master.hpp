@@ -1,6 +1,9 @@
+#ifndef MASTER
+#define MASTER
 #include<bits/stdc++.h>
-#include "vertex.hpp"
+#include "aggregator.hpp"
 #include "node.hpp"
+#include "vertex.hpp"
 #include<mpi.h>
 using namespace std;
 
@@ -14,6 +17,13 @@ class Master : public Node<Vertex> {
     Master( int workerId, int numWorkers) {
         this->numWorkers = numWorkers;
         this->workerId = workerId;
+    }
+
+    void run() {
+        do{
+            superstep();
+            sendMessages();
+        }while((numActive() > 0));
     }
 
 
@@ -43,3 +53,4 @@ class Master : public Node<Vertex> {
     void output_results();
 
 };
+#endif

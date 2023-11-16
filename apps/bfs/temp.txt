@@ -1,0 +1,2 @@
+mpic++ bfs.cpp -g -o bfs -I ../../lib   -Wno-deprecated -w
+time mpirun -np 6 ./bfs

@@ -1,8 +1,5 @@
 //create a base class node and then inherit master and worker from it. proc 0 is master and rest are workers
-#include "master.hpp"
-#include "worker.hpp"
-#include "vertex.hpp"
-#include<mpi.h>
+#include "pregel.hpp"
 #include<bits/stdc++.h>
 using namespace std;
 

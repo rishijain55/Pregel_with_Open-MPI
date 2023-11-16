@@ -1,5 +1,5 @@
-#ifndef VERTEX_HPP
-#define VERTEX_HPP
+#ifndef VERTEX
+#define VERTEX
 #include<bits/stdc++.h>
 using namespace std;
 
@@ -35,4 +35,4 @@ public:
     void update();
 
 };
-#endif // VERTEX_HPP
+#endif // VERTEX
