@@ -1,9 +1,17 @@
 //create a base class node and then inherit master and worker from it. proc 0 is master and rest are workers
 #include "master.hpp"
 #include "worker.hpp"
+#include "vertex.hpp"
 #include<mpi.h>
 #include<bits/stdc++.h>
 using namespace std;
+
+
+class Vertex : public baseVertex<int> {
+    public:
+    using baseVertex<int>::baseVertex;
+    void update();
+};
 
 vector<Vertex*> get_graph(int workerId, int numWorkers) {
     vector<Vertex*> vertices;
@@ -14,13 +22,15 @@ vector<Vertex*> get_graph(int workerId, int numWorkers) {
     return vertices;
 }
 
-void Worker::output_results() {
-    for (auto vertex : vertices) {
+template<>
+void Worker<Vertex>::output_results() {
+    for (auto vertex : this->vertices) {
         cout << vertex->id << " " << vertex->value << endl;
     }
 }
 
-void Master::output_results() {
+template<>
+void Master<Vertex>::output_results() {
     return;
 }
 
@@ -50,13 +60,13 @@ int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numWorkers);
     MPI_Comm_rank(MPI_COMM_WORLD, &workerId);
-    Node* node;
+    Node<Vertex>* node;
     if (workerId == 0) {
 
-        node = new Master(workerId, numWorkers);
+        node = new Master<Vertex>(workerId, numWorkers);
     } else {
         vector<Vertex*> vertices = get_graph(workerId, numWorkers);
-        node = new Worker(workerId, numWorkers, vertices);
+        node = new Worker<Vertex>(workerId, numWorkers, vertices);
     }
     node->run();
     MPI_Finalize();

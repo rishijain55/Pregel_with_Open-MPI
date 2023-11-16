@@ -2,15 +2,17 @@
 #define NODE_HPP
 
 #include<bits/stdc++.h>
-#include "vertex.hpp"
 #include <mpi.h>
+#include "vertex.hpp"
 using namespace std;
 
-
+template<typename Vertex>
 class Node {
     public:
     int numWorkers;
     int workerId;
+    vector<Vertex*> vertices;
+    typedef pairsec<typename Vertex::valType> pairID;
 
     void run() {
         do{
@@ -35,9 +37,22 @@ class Node {
         return vid/(numWorkers-1);
     }
 
+    bool isActive() {
+        for (auto vertex : vertices) {
+            if (vertex->active) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void superstep() {
+        for (auto vertex : vertices) {
+            vertex->update();
+        }
+    }
+
     virtual void sendMessages() = 0;
-    virtual void superstep() = 0;
-    virtual bool isActive() = 0;
     virtual void output_results() = 0;
 };
 

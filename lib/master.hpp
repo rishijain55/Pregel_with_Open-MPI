@@ -4,28 +4,26 @@
 #include<mpi.h>
 using namespace std;
 
-class Master : public Node {
+
+template<typename Vertex>
+class Master : public Node<Vertex> {
     public:
+
+    typedef pairsec<double> pairID;
+
     Master( int workerId, int numWorkers) {
         this->numWorkers = numWorkers;
         this->workerId = workerId;
     }
 
-    void superstep() {
-        //implement
-        return;
-    }
 
-    bool isActive() {
-        return false;
-    }
 
     void sendMessages() {
         // note that 0 is the master. so here no message is sent
-        vector<int> sendcounts(numWorkers, 0);
-        vector<int> displs(numWorkers, 0);
-        vector<int> recvcounts(numWorkers, 0);
-        vector<int> recvdispls(numWorkers, 0);
+        vector<int> sendcounts(this->numWorkers, 0);
+        vector<int> displs(this->numWorkers, 0);
+        vector<int> recvcounts(this->numWorkers, 0);
+        vector<int> recvdispls(this->numWorkers, 0);
         // Prepare messages to send
         pairID *messagesToSend = new pairID[0];
         // Send counts
@@ -43,5 +41,5 @@ class Master : public Node {
     }
 
     void output_results();
-    
+
 };

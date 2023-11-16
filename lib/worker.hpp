@@ -4,10 +4,10 @@
 #include<mpi.h>
 using namespace std;
 
-
-class Worker : public Node {
+template<typename Vertex>
+class Worker : public Node<Vertex> {
     public:
-    vector<Vertex*> vertices;
+    typedef pairsec<typename Vertex::valType> pairID;
 
     Worker( int workerId, int numWorkers, vector<Vertex*> vertices) {
         this->vertices = vertices;
@@ -15,50 +15,35 @@ class Worker : public Node {
         this->workerId = workerId;
     }
 
-    void superstep() {
-        for (auto vertex : vertices) {
-            vertex->update();
-        }
-    }
-
-    bool isActive() {
-        for (auto vertex : vertices) {
-            if (vertex->active) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     void sendMessages() {
         // note that 0 is the master. use alltoall for transfering messages
-        vector<int> sendcounts(numWorkers, 0);
-        vector<int> displs(numWorkers, 0);
-        vector<int> recvcounts(numWorkers, 0);
-        vector<int> recvdispls(numWorkers, 0);
+        vector<int> sendcounts(this->numWorkers, 0);
+        vector<int> displs(this->numWorkers, 0);
+        vector<int> recvcounts(this->numWorkers, 0);
+        vector<int> recvdispls(this->numWorkers, 0);
         // Prepare messages to send
         
         int tot_send = 0;
-        for (auto vertex : vertices) {
+        for (auto vertex : this->vertices) {
             vertex->superstep++;
             for (auto message : vertex->outgoingMessages) {
                 // cout<<"Worker "<<workerId<<" sending "<<message.second<<" to "<<message.first<<endl;
-                sendcounts[workerFromId(message.first)]++;
+                sendcounts[this->workerFromId(message.first)]++;
                 tot_send++;
             }
             vertex->incomingMessages.clear();
             // vertex->outgoingMessages.clear();
         }
         // Calculate displacements for sending
-        for (int i = 0; i < numWorkers; i++) {
+        for (int i = 0; i < this->numWorkers; i++) {
             displs[i] = displs[i-1] + sendcounts[i-1];
         }
 
         pairID *messagesToSend = new pairID[tot_send];
-        vector<int> cur_cnt(numWorkers, 0);
-        for (auto vertex : vertices) {
+        vector<int> cur_cnt(this->numWorkers, 0);
+        for (auto vertex : this->vertices) {
             for (auto message : vertex->outgoingMessages) {
-                int torecv = workerFromId(message.first);
+                int torecv = this->workerFromId(message.first);
                 // cout<<"Worker "<<workerId<<" sending "<<message.second<<" to "<<message.first<<" which is server "<<torecv<<endl;
                 messagesToSend[displs[torecv] + cur_cnt[torecv]] = message;
                 cur_cnt[torecv]++;
@@ -66,25 +51,24 @@ class Worker : public Node {
             vertex->outgoingMessages.clear();
         }
         // cout<<"printing send counts"<<endl;
-        // for (int i = 0; i < numWorkers; i++) {
+        // for (int i = 0; i < this->numWorkers; i++) {
         //     cout<<sendcounts[i]<<" from server "<<workerId<<" to "<<i<<endl;
         // }
         // Send counts
         MPI_Alltoall(sendcounts.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT, MPI_COMM_WORLD);
         // cout<<"printing counts"<<endl;
-        // for (int i = 0; i < numWorkers; i++) {
+        // for (int i = 0; i < this->numWorkers; i++) {
         //     cout<<recvcounts[i]<<" for server "<<workerId<<" from "<<i<<endl;
         // }
 
         // Calculate displacements for receiving
-        for (int i = 1; i < numWorkers; i++) {
+        for (int i = 1; i < this->numWorkers; i++) {
             recvdispls[i] = recvdispls[i-1] + recvcounts[i-1];
         }
 
         // Receive messages
-        
         int tot_recv = 0;
-        for (int i = 0; i < numWorkers; i++) {
+        for (int i = 0; i < this->numWorkers; i++) {
             tot_recv += recvcounts[i];
         }
         pairID *messagesToReceive = new pairID[tot_recv];
@@ -104,7 +88,7 @@ class Worker : public Node {
         for (int i = 0; i < tot_recv; i++) {
             int vid = messagesToReceive[i].first;
             double value = messagesToReceive[i].second;
-            vertices[getIndex(vid)]->incomingMessages.push_back(value);
+            this->vertices[this->getIndex(vid)]->incomingMessages.push_back(value);
             // cout<<"Worker "<<workerId<<" received "<<value<<" for "<<vid<<endl;
         }
     }

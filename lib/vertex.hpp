@@ -3,25 +3,28 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-
-struct pairID {
+template<typename T>
+struct pairsec {
     int first;
-    double second;
+    T second;
 };
 
 
-class Vertex {
+template<typename T>
+class baseVertex {
 public:
+    typedef T valType;
+    typedef pairsec<valType> pairID;
     int id;
-    double value;
+    valType value;
     vector<int> outVertices_id;
-    vector< double> incomingMessages;
+    vector< valType> incomingMessages;
     vector<pairID> outgoingMessages;
     bool active;
     int superstep;
 
     // Constructor, Update method, etc.
-    Vertex(int id, double value, vector<int> outVertices_id) {
+    baseVertex(int id, valType value, vector<int> outVertices_id) {
         this->id = id;
         this->value = value;
         this->outVertices_id = outVertices_id;
