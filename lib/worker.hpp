@@ -4,6 +4,7 @@
 #include "aggregator.hpp"
 #include "node.hpp"
 #include "vertex.hpp"
+#include "mpiType.hpp"
 #include<mpi.h>
 using namespace std;
 
@@ -38,10 +39,11 @@ class Worker : public Node<Vertex> {
                 tot_send++;
             }
             vertex->incomingMessages.clear();
-            // vertex->outgoingMessages.clear();
         }
+
+        sendcounts[this->workerId] = 0;
         // Calculate displacements for sending
-        for (int i = 0; i < this->numWorkers; i++) {
+        for (int i = 1; i < this->numWorkers; i++) {
             displs[i] = displs[i-1] + sendcounts[i-1];
         }
 
@@ -51,8 +53,15 @@ class Worker : public Node<Vertex> {
             for (auto message : vertex->outgoingMessages) {
                 int torecv = this->workerFromId(message.first);
                 // cout<<"Worker "<<workerId<<" sending "<<message.second<<" to "<<message.first<<" which is server "<<torecv<<endl;
-                messagesToSend[displs[torecv] + cur_cnt[torecv]] = message;
-                cur_cnt[torecv]++;
+                int sid = this->workerFromId(message.first);
+                if(sid==this->workerId){
+                    int vid = message.first;
+                    this->vertices[this->getIndex(vid)]->incomingMessages.push_back(message.second);
+                }
+                else{
+                    messagesToSend[displs[torecv] + cur_cnt[torecv]] = message;
+                    cur_cnt[torecv]++;
+                }
             }
             vertex->outgoingMessages.clear();
         }
@@ -80,7 +89,9 @@ class Worker : public Node<Vertex> {
         pairID *messagesToReceive = new pairID[tot_recv];
         //create a type for pairID
         MPI_Datatype MPI_PAIR;
-        MPI_Datatype types [2] = {MPI_INT, MPI_DOUBLE};
+        MPI_Datatype types[2];
+        types[0] = MPI_INT;
+        types[1] = getMPIType<typename Vertex::valType>();
         int bl[2] = {1,1};
 
 

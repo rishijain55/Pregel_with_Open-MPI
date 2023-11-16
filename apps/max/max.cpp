@@ -12,24 +12,20 @@ class Vertex : public baseVertex<int> {
 
 vector<Vertex*> get_graph(int workerId,int numWorkers){
     vector<Vertex*> vertices;
-    int N = 20;
+    int N = 400;
     int start = (N/(numWorkers-1))*(workerId-1);
     int end = start + N/(numWorkers-1);
     if(workerId==numWorkers-1) end = N;
     for(int i=start;i<end;i++){
         set<int> adj;
-        while(adj.size()!=10){
+        while(adj.size()!=3){
             int t = rand()%N;
             if(t==i) continue;
             adj.insert(t);
         }
         vector<int> targets(adj.begin(),adj.end());
-        cout<<"Worker "<<workerId<<" vertex "<<i<<" has "<<targets.size()<<" out edges"<<endl;
-        for(auto t:targets){
-            cout<<t<<" ";
-        }
-        cout<<endl;
-        int value = 0;
+
+        int value = workerId;
         vertices.push_back(new Vertex(i,value,targets));
     }
     return vertices;
@@ -82,6 +78,7 @@ int main(int argc, char** argv) {
         vector<Vertex*> vertices = get_graph(workerId, numWorkers);
         node = new Worker<Vertex>(workerId, numWorkers, vertices);
     }
+
     node->run();
     MPI_Finalize();
     return 0;

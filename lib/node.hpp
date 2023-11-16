@@ -15,9 +15,12 @@ class Node {
     typedef pairsec<typename Vertex::valType> pairID;
 
     void run() {
+
         do{
+            // cout<<"Worker "<<workerId<<" going for superstep "<<endl;
             superstep();
             sendMessages();
+            // cout<<"Worker "<<workerId<<" superstep done"<<endl;
         }while((numActive() > 0));
         output_results();
     }

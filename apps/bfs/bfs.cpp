@@ -22,11 +22,6 @@ vector<Vertex*> get_graph(int workerId,int numWorkers){
             adj.insert(t);
         }
         vector<int> targets(adj.begin(),adj.end());
-        cout<<"Worker "<<workerId<<" vertex "<<i<<" has "<<targets.size()<<" out edges"<<endl;
-        for(auto t:targets){
-            cout<<t<<" ";
-        }
-        cout<<endl;
         int value = 0;
         vertices.push_back(new Vertex(i,value,targets));
     }
