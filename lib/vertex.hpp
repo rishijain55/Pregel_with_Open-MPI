@@ -2,6 +2,11 @@
 #define VERTEX_HPP
 #include<bits/stdc++.h>
 
+struct pairID {
+    int first;
+    double second;
+};
+
 using namespace std;
 // Vertex.h
 class Vertex {
@@ -10,7 +15,7 @@ public:
     double value;
     vector<int> outVertices_id;
     vector< double> incomingMessages;
-    vector<pair<int, double>> outgoingMessages;
+    vector<pairID> outgoingMessages;
     bool active;
     int superstep;
 

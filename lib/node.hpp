@@ -6,6 +6,7 @@
 #include <mpi.h>
 using namespace std;
 
+
 class Node {
     public:
 
@@ -19,7 +20,7 @@ class Node {
     }
     virtual void sendMessages() = 0;
     virtual void superstep() = 0;
-    virtual int worker(Vertex* vertex) = 0;
+    virtual int workerFromId(int vid) = 0;
 };
 
 #endif // NODE_HPP
