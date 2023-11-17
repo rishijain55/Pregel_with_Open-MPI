@@ -24,18 +24,15 @@ class Worker : public Node<Vertex> {
 
 
     void sendMessages() {
-        // note that 0 is the master. use alltoall for transfering messages
         vector<int> sendcounts(this->numWorkers, 0);
         vector<int> displs(this->numWorkers, 0);
         vector<int> recvcounts(this->numWorkers, 0);
         vector<int> recvdispls(this->numWorkers, 0);
         // Prepare messages to send
-        
         int tot_send = 0;
         for (auto vertex : this->vertices) {
             vertex->superstep++;
             for (auto message : vertex->outgoingMessages) {
-                // cout<<"Worker "<<workerId<<" sending "<<message.second<<" to "<<message.first<<endl;
                 sendcounts[this->workerFromId(message.first)]++;
                 tot_send++;
             }
@@ -53,7 +50,6 @@ class Worker : public Node<Vertex> {
         for (auto vertex : this->vertices) {
             for (auto message : vertex->outgoingMessages) {
                 int torecv = this->workerFromId(message.first);
-                // cout<<"Worker "<<workerId<<" sending "<<message.second<<" to "<<message.first<<" which is server "<<torecv<<endl;
                 int sid = this->workerFromId(message.first);
                 if(sid==this->workerId){
                     int vid = message.first;
@@ -66,17 +62,8 @@ class Worker : public Node<Vertex> {
             }
             vertex->outgoingMessages.clear();
         }
-        // cout<<"printing send counts"<<endl;
-        // for (int i = 0; i < this->numWorkers; i++) {
-        //     cout<<sendcounts[i]<<" from server "<<workerId<<" to "<<i<<endl;
-        // }
-        // Send counts
-        MPI_Alltoall(sendcounts.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT, MPI_COMM_WORLD);
-        // cout<<"printing counts"<<endl;
-        // for (int i = 0; i < this->numWorkers; i++) {
-        //     cout<<recvcounts[i]<<" for server "<<workerId<<" from "<<i<<endl;
-        // }
 
+        MPI_Alltoall(sendcounts.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT, MPI_COMM_WORLD);
         // Calculate displacements for receiving
         for (int i = 1; i < this->numWorkers; i++) {
             recvdispls[i] = recvdispls[i-1] + recvcounts[i-1];
@@ -107,7 +94,6 @@ class Worker : public Node<Vertex> {
             int vid = messagesToReceive[i].first;
             double value = messagesToReceive[i].second;
             this->vertices[this->getIndex(vid)]->incomingMessages.push_back(value);
-            // cout<<"Worker "<<workerId<<" received "<<value<<" for "<<vid<<endl;
         }
     }
 
