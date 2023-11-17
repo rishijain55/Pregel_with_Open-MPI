@@ -10,10 +10,9 @@ class Vertex : public baseVertex<int> {
 
 vector<Vertex*> get_graph(int workerId,int numWorkers, int num_vertices, int num_edges){
     vector<Vertex*> vertices;
-    int start = (num_vertices/(numWorkers-1))*(workerId-1);
-    int end = start + num_vertices/(numWorkers-1);
-    if(workerId==numWorkers-1) end = num_vertices;
-    for(int i=start;i<end;i++){
+    int start = workerId-1;
+    int end = num_vertices;
+    for(int i=start;i<end;i+=numWorkers-1){
         set<int> adj;
         while(adj.size()!=num_edges){
             int t = rand()%num_vertices;

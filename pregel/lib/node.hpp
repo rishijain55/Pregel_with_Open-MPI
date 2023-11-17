@@ -12,6 +12,7 @@ class Node {
     int numWorkers;
     int workerId;
     vector<Vertex*> vertices;
+    int numVertices;
     typedef pairsec<typename Vertex::valType> pairID;
 
     void run() {
@@ -36,7 +37,7 @@ class Node {
         return ((vid%(numWorkers-1)) +1);
     }
 
-    int getIndex(int vid) {
+    int getIndex(int vid) { 
         return vid/(numWorkers-1);
     }
 
