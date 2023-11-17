@@ -13,12 +13,13 @@ class Worker : public Node<Vertex> {
     public:
     typedef pairsec<typename Vertex::valType> pairID;
 
-    Aggregator agg;
+    Aggregator<typename Vertex::valType>* agg;
 
     Worker( int workerId, int numWorkers, vector<Vertex*> vertices) {
         this->vertices = vertices;
         this->numWorkers = numWorkers;
         this->workerId = workerId;
+        this->agg = new Aggregator<typename Vertex::valType>(numWorkers,workerId);
     }
 
 

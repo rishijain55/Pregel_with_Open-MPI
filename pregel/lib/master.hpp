@@ -13,10 +13,12 @@ class Master : public Node<Vertex> {
     public:
 
     typedef pairsec<double> pairID;
+    Aggregator<typename Vertex::valType>* agg;
 
     Master( int workerId, int numWorkers) {
         this->numWorkers = numWorkers;
         this->workerId = workerId;
+        this->agg = new Aggregator<typename Vertex::valType>(numWorkers,workerId);
     }
 
 
