@@ -1,5 +1,5 @@
 CCOMPILE=mpic++
-CFLAGS= -lboost_mpi -lboost_serialization -lboost_graph -lboost_graph_parallel
+CFLAGS= -lboost_mpi -lboost_serialization -lboost_graph -lboost_graph_parallel -w
 ARCHIVE=
 
 all: bfs

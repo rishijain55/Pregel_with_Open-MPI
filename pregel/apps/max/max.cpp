@@ -10,22 +10,19 @@ class Vertex : public baseVertex<int> {
     void update();
 };
 
-vector<Vertex*> get_graph(int workerId,int numWorkers){
+vector<Vertex*> get_graph(int workerId,int numWorkers, int num_vertices, int num_edges){
     vector<Vertex*> vertices;
-    int N = 400;
-    int start = (N/(numWorkers-1))*(workerId-1);
-    int end = start + N/(numWorkers-1);
-    if(workerId==numWorkers-1) end = N;
-    for(int i=start;i<end;i++){
+    int start = workerId-1;
+    int end = num_vertices;
+    for(int i=start;i<end;i+=numWorkers-1){
         set<int> adj;
-        while(adj.size()!=3){
-            int t = rand()%N;
+        while(adj.size()!=num_edges){
+            int t = rand()%num_vertices;
             if(t==i) continue;
             adj.insert(t);
         }
         vector<int> targets(adj.begin(),adj.end());
-
-        int value = workerId;
+        int value = i;
         vertices.push_back(new Vertex(i,value,targets));
     }
     return vertices;
@@ -75,7 +72,9 @@ int main(int argc, char** argv) {
 
         node = new Master<Vertex>(workerId, numWorkers);
     } else {
-        vector<Vertex*> vertices = get_graph(workerId, numWorkers);
+        int num_vertices = int(atoi(argv[1]));
+        int num_edges = int(atoi(argv[2]));
+        vector<Vertex*> vertices = get_graph(workerId, numWorkers, num_vertices, num_edges);
         node = new Worker<Vertex>(workerId, numWorkers, vertices);
     }
 

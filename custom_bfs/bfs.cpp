@@ -62,7 +62,7 @@ void bfs(unordered_map<int, vector<int> > &adj, int nProcs, int myRank,unordered
 
 void get_graph(unordered_map<int, vector<int>> &adj, int N, int EperN, int myRank, int nProcs){
     int vert = N/nProcs;
-    int start = myRank-1;
+    int start = myRank;
     int end = N;
     for(int i=start;i<end;i+=nProcs-1){
         set<int> s;

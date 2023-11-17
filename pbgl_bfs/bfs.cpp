@@ -30,7 +30,7 @@ typedef adjacency_list<vecS, distributedS<mpi_process_group, vecS>, directedS,
 
 void get_graph(int numWorkers,int N,int Edges, Graph &g){
     for(int workerId=0;workerId<numWorkers;workerId++){
-    int start = workerId-1;
+    int start = workerId;
     int end = N;
     for(int i=start;i<end;i+=numWorkers-1){
             std::set<int> adj;
