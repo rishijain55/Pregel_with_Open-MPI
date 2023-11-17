@@ -5,23 +5,21 @@
 #include <omp.h>
 
 using namespace std;
-#define MAXSIZE 100
-
 int *parProc;
 vector<int> myNodes;
 
 
 
-void bfs(unordered_map<int, vector<int> > &adj, int nProcs, int myRank,unordered_set<int> &level, unordered_map<int,int> &color, int curCol)
+void bfs(unordered_map<int, vector<int> > &adj, int nProcs, int myRank,unordered_set<int> &level, unordered_map<int,int> &dist, int curDis)
 {
     vector<int> newlevel;
     for(auto i: level){
         for(auto j: adj[i]){
-            if(color.find(j) == color.end()){
+            if(dist.find(j) == dist.end()){
                 newlevel.push_back(j);
                 
             }
-            color[j] = curCol;
+            dist[j] = curDis;
         }
     }
     
@@ -41,7 +39,7 @@ void bfs(unordered_map<int, vector<int> > &adj, int nProcs, int myRank,unordered
     for(int i = 0 ; i < recvDispls[nProcs-1] + recvSizes[nProcs-1] ; i ++){
         int u = recvbuf[i];
             if(myRank == parProc[u]) level.insert(u);
-            color[u] = curCol;
+            dist[u] = curDis;
     }
     
     delete[] recvSizes;
@@ -58,7 +56,7 @@ void bfs(unordered_map<int, vector<int> > &adj, int nProcs, int myRank,unordered
         return;
     }
     else{
-        bfs(adj, nProcs, myRank, level, color, curCol);
+        bfs(adj, nProcs, myRank, level, dist, curDis+1);
     }
 }
 
@@ -77,7 +75,6 @@ void get_graph(unordered_map<int, vector<int>> &adj, int N, int EperN, int myRan
         vector<int> v(s.begin(), s.end());
         adj[i] = v;
     }
-
 }
 
 
@@ -88,9 +85,7 @@ int main(int argc, char ** argv){
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
     unordered_map<int, vector<int> > adj;
     unordered_set<int> level;
-    unordered_map<int,int> color;
-
-
+    unordered_map<int,int> dist;
 
     int N = stoi(argv[1]);
     int EperN = stoi(argv[2]);
@@ -106,34 +101,36 @@ int main(int argc, char ** argv){
 
     get_graph(adj, N, EperN, myRank, nProcs);
 
-
     int curNode = 0;
-    int curCol = 1;
+    int curDis = 0;
 
-    while(curNode < N){
-        if(parProc[curNode]== myRank){
-            int flag =0;
-            if(color.find(curNode) == color.end() ){ 
-                color[curNode] = curCol;
-                level.insert(curNode);
-                flag =1;
-                bfs(adj,nProcs, myRank, level, color, curCol);
-                curCol++;
-            }
+    if(parProc[curNode]== myRank){
+        int flag =0;
+        if(dist.find(curNode) == dist.end() ){ 
+            dist[curNode] = curDis;
+            level.insert(curNode);
+            flag =1;
+            bfs(adj,nProcs, myRank, level, dist, curDis+1);
+        }
 
-        }
-        else{
-            int flag;
-            if(color.find(curNode) == color.end() ){ 
-                color[curNode] = curCol;
-                bfs(adj,nProcs, myRank, level, color, curCol);
-                curCol++;
-            }
-        }
-        curNode++;
-        level.clear();
     }
-    cout<<"Rank: "<<myRank<<" Col: "<<curCol-1<<endl;
+    else{
+        int flag;
+        if(dist.find(curNode) == dist.end() ){ 
+            dist[curNode] = curDis;
+            bfs(adj,nProcs, myRank, level, dist, curDis+1);
+        }
+    }
+    level.clear();
+    if(myRank == 0){
+        for(int i = 0 ; i < N ; i ++){
+            if(dist.find(i) != dist.end())
+            cout<<i<<" "<<dist[i]<<endl;
+            else{
+                cout<<i<<" "<<"-1"<<endl;
+            }
+        }
+    }
     MPI_Finalize();
     return 0;
 }

@@ -8,21 +8,20 @@ class Vertex : public baseVertex<int> {
     void update();
 };
 
-vector<Vertex*> get_graph(int workerId,int numWorkers){
+vector<Vertex*> get_graph(int workerId,int numWorkers, int num_vertices, int num_edges){
     vector<Vertex*> vertices;
-    int N = 20;
-    int start = (N/(numWorkers-1))*(workerId-1);
-    int end = start + N/(numWorkers-1);
-    if(workerId==numWorkers-1) end = N;
+    int start = (num_vertices/(numWorkers-1))*(workerId-1);
+    int end = start + num_vertices/(numWorkers-1);
+    if(workerId==numWorkers-1) end = num_vertices;
     for(int i=start;i<end;i++){
         set<int> adj;
-        while(adj.size()!=10){
-            int t = rand()%N;
+        while(adj.size()!=num_edges){
+            int t = rand()%num_vertices;
             if(t==i) continue;
             adj.insert(t);
         }
         vector<int> targets(adj.begin(),adj.end());
-        int value = 0;
+        int value = -1;
         vertices.push_back(new Vertex(i,value,targets));
     }
     return vertices;
@@ -31,10 +30,10 @@ vector<Vertex*> get_graph(int workerId,int numWorkers){
 
 void Vertex::update(){
     if(id==0 && superstep==0) incomingMessages.push_back(0);
-    if(value ==1 || incomingMessages.size()==0) active = false;
+    if(value !=-1 || incomingMessages.size()==0) active = false;
     else{
         active = true;
-        value = 1;
+        value = superstep; //distance
         for(auto t:outVertices_id){
             outgoingMessages.push_back({t,0});
         }
@@ -61,10 +60,11 @@ int main(int argc, char** argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &workerId);
     Node<Vertex>* node;
     if (workerId == 0) {
-
         node = new Master<Vertex>(workerId, numWorkers);
     } else {
-        vector<Vertex*> vertices = get_graph(workerId, numWorkers);
+        int num_vertices = int(atoi(argv[1]));
+        int num_edges = int(atoi(argv[2]));
+        vector<Vertex*> vertices = get_graph(workerId, numWorkers, num_vertices, num_edges);
         node = new Worker<Vertex>(workerId, numWorkers, vertices);
     }
     node->run();

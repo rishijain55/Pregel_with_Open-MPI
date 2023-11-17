@@ -8,7 +8,7 @@ bfs: bfs.cpp
 	$(CCOMPILE) bfs.cpp -o bfs $(CFLAGS) $(ARCHIVE)
 
 run: bfs
-	time mpirun -np 2 ./bfs
+	time mpirun -np 2 ./bfs 10 2 
 
 clean:
 	-rm bfs
